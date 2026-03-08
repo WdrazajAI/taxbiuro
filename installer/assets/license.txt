@@ -1,0 +1,40 @@
+PLATNIK ZUS EXPORTER - UMOWA LICENCYJNA
+=======================================
+
+Copyright (c) 2024 Wdrazaj.ai
+Wszelkie prawa zastrzeżone.
+
+WARUNKI UŻYTKOWANIA:
+
+1. LICENCJA
+   Niniejsze oprogramowanie jest udostępniane na zasadach licencji
+   proprietarnej. Użytkownik otrzymuje prawo do korzystania z aplikacji
+   wyłącznie zgodnie z jej przeznaczeniem.
+
+2. OGRANICZENIA
+   Zabrania się:
+   - Dekompilacji, deasemblacji lub inżynierii wstecznej
+   - Dystrybucji bez zgody autora
+   - Modyfikacji kodu źródłowego
+   - Wykorzystania w celach niezgodnych z prawem
+
+3. ODPOWIEDZIALNOŚĆ
+   Oprogramowanie jest dostarczane "tak jak jest" (AS IS).
+   Autor nie ponosi odpowiedzialności za:
+   - Utratę danych
+   - Przerwy w działaniu
+   - Szkody wynikające z użytkowania
+
+4. OCHRONA DANYCH
+   Użytkownik przyjmuje do wiadomości, że aplikacja:
+   - Łączy się z lokalną bazą danych programu Płatnik
+   - Może wysyłać dane do zewnętrznego serwisu (webhook n8n)
+   - Nie przechowuje danych w chmurze bez wiedzy użytkownika
+
+5. AKCEPTACJA
+   Instalując lub używając tego oprogramowania, użytkownik akceptuje
+   wszystkie warunki niniejszej umowy licencyjnej.
+
+---
+Kontakt: kontakt@wdrazaj.ai
+Strona: https://wdrazaj.ai

@@ -46,3 +46,13 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+
+# Installer build artifacts
+installer/output/
+installer/redist/
+redist/
+*.spec
+
+# PyInstaller
+*.manifest
+*.exe
