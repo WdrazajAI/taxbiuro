@@ -1,0 +1,24 @@
+{
+  "name": "Sk³adki ZUS - wysy³ka e-maili",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "zus-skladki-powiadomienia",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-zus-input",
+      "name": "Webhook - Dane ZUS",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "zus-skladki-webhook"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

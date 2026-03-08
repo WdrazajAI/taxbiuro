@@ -1,0 +1,5 @@
+{
+  "sql_server": "localhost\\SQLEXPRESS",
+  "database": "tax_testowa",
+  "webhook_url": ""
+}

@@ -1,0 +1,23 @@
+{
+  "okres": "202402",
+  "okres_czytelny": "Luty 2024",
+  "data_eksportu": "2024-03-01",
+  "liczba_klientow": 3,
+  "klienci": [
+    {
+      "nip": "1234567890",
+      "nazwa": "Test Firma Sp. z o.o.",
+      "suma_do_zaplaty": "1500.00"
+    },
+    {
+      "nip": "0987654321",
+      "nazwa": "Another Company Ltd.",
+      "suma_do_zaplaty": "2300.50"
+    },
+    {
+      "nip": "1111222233",
+      "nazwa": "Inactive Client Sp. z o.o.",
+      "suma_do_zaplaty": "750.00"
+    }
+  ]
+}
