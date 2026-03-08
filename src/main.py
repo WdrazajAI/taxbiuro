@@ -13,16 +13,19 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional
 
-# Add src directory to path for imports
+# Handle imports for both frozen (exe) and normal execution
 if getattr(sys, 'frozen', False):
+    # Running as compiled exe
     BASE_DIR = Path(sys.executable).parent
+    # When frozen, modules are in the same package
+    from src.db_reader import DatabaseReader, format_okres_readable, generate_periods
+    from src.webhook_sender import WebhookSender, format_payload_preview
 else:
+    # Running as script
     BASE_DIR = Path(__file__).parent.parent
-
-sys.path.insert(0, str(BASE_DIR / "src"))
-
-from db_reader import DatabaseReader, format_okres_readable, generate_periods
-from webhook_sender import WebhookSender, format_payload_preview
+    sys.path.insert(0, str(BASE_DIR / "src"))
+    from db_reader import DatabaseReader, format_okres_readable, generate_periods
+    from webhook_sender import WebhookSender, format_payload_preview
 
 
 # Professional color scheme (unified across app)
