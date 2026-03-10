@@ -1,5 +1,7 @@
 {
   "sql_server": "localhost\\SQLEXPRESS",
   "database": "tax_testowa",
-  "webhook_url": ""
+  "sql_username": "",
+  "sql_password": "",
+  "webhook_url": "https://wdrazajai.app.n8n.cloud/webhook/TAXBIURO"
 }

@@ -16,16 +16,25 @@ from typing import Dict, List, Optional
 # Handle imports for both frozen (exe) and normal execution
 if getattr(sys, 'frozen', False):
     # Running as compiled exe
-    BASE_DIR = Path(sys.executable).parent
+    EXE_DIR = Path(sys.executable).parent
+    # Config goes to AppData (user-writable folder), not Program Files!
+    # This is the standard Windows way - user data in %APPDATA%
+    APPDATA = Path(os.environ.get('APPDATA', os.path.expanduser('~')))
+    CONFIG_DIR = APPDATA / 'PlatnikZUSExporter'
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     # When frozen, modules are in the same package
     from src.db_reader import DatabaseReader, format_okres_readable, generate_periods
     from src.webhook_sender import WebhookSender, format_payload_preview
 else:
-    # Running as script
-    BASE_DIR = Path(__file__).parent.parent
-    sys.path.insert(0, str(BASE_DIR / "src"))
+    # Running as script - config stays in project folder
+    EXE_DIR = Path(__file__).parent.parent
+    CONFIG_DIR = EXE_DIR
+    sys.path.insert(0, str(EXE_DIR / "src"))
     from db_reader import DatabaseReader, format_okres_readable, generate_periods
     from webhook_sender import WebhookSender, format_payload_preview
+
+# BASE_DIR for backwards compatibility (icon, etc.)
+BASE_DIR = EXE_DIR
 
 
 # Professional color scheme (unified across app)
@@ -67,7 +76,8 @@ class Config:
             "database": "tax_testowa",
             "sql_username": "",
             "sql_password": "",
-            "webhook_url": ""
+            "webhook_url": "",
+            "webhook_api_key": ""
         }
 
         if self.config_path.exists():
@@ -102,8 +112,8 @@ class PlatnikExporterApp:
         self.root.resizable(True, True)
         self.root.minsize(700, 600)
 
-        # Load config
-        self.config = Config(BASE_DIR / "config.json")
+        # Load config from AppData (user-writable) or project dir (dev mode)
+        self.config = Config(CONFIG_DIR / "config.json")
 
         # Initialize database reader
         self.db_reader = DatabaseReader(
@@ -114,7 +124,10 @@ class PlatnikExporterApp:
         )
 
         # Initialize webhook sender
-        self.webhook_sender = WebhookSender(self.config.get('webhook_url'))
+        self.webhook_sender = WebhookSender(
+            self.config.get('webhook_url'),
+            self.config.get('webhook_api_key', '')
+        )
 
         # Current payload for preview
         self.current_payload = None
@@ -679,7 +692,10 @@ class PlatnikExporterApp:
             self.config.get('sql_username', ''),
             self.config.get('sql_password', '')
         )
-        self.webhook_sender = WebhookSender(self.config.get('webhook_url'))
+        self.webhook_sender = WebhookSender(
+            self.config.get('webhook_url'),
+            self.config.get('webhook_api_key', '')
+        )
 
         self._check_connections()
         self._load_periods()
@@ -781,6 +797,10 @@ class ConfigDialog:
         self.webhook_entry = self._create_input_field(webhook_inner,
             "Webhook URL", "https://your-n8n.app.n8n.cloud/webhook/...",
             self.config.get('webhook_url', ''))
+
+        self.apikey_entry = self._create_input_field(webhook_inner,
+            "API Key (opcjonalnie)", "Klucz API do autoryzacji webhooka",
+            self.config.get('webhook_api_key', ''), is_password=True)
 
         # ══════════════════════════════════════════════════════════════════
         # OPTIONAL AUTH CARD (COLLAPSIBLE STYLE)
@@ -889,22 +909,29 @@ class ConfigDialog:
             show='●' if is_password else '')
         entry.pack(fill=tk.X, ipady=8, padx=1, pady=1)
 
+        # Store placeholder as attribute for later checking
+        entry.placeholder = placeholder
+        entry.has_placeholder = False
+
         if value:
             entry.insert(0, value)
         else:
             # Placeholder effect
             entry.insert(0, placeholder)
             entry.config(fg=C['text_muted'])
+            entry.has_placeholder = True
 
             def on_focus_in(e):
-                if entry.get() == placeholder:
+                if entry.has_placeholder:
                     entry.delete(0, tk.END)
                     entry.config(fg=C['text'], show='●' if is_password else '')
+                    entry.has_placeholder = False
 
             def on_focus_out(e):
                 if not entry.get():
                     entry.insert(0, placeholder)
                     entry.config(fg=C['text_muted'], show='')
+                    entry.has_placeholder = True
 
             entry.bind('<FocusIn>', on_focus_in)
             entry.bind('<FocusOut>', on_focus_out)
@@ -955,7 +982,13 @@ class ConfigDialog:
     def _get_entry_value(self, entry: tk.Entry, placeholder: str = "") -> str:
         """Get entry value, ignoring placeholder text."""
         value = entry.get()
-        if value == placeholder or entry.cget('fg') == self.DIALOG_COLORS['text_muted']:
+        if not value:
+            return ""
+        # Use has_placeholder flag if available (most reliable)
+        if hasattr(entry, 'has_placeholder') and entry.has_placeholder:
+            return ""
+        # Fallback: check if value exactly matches placeholder
+        if value == placeholder:
             return ""
         return value.strip()
 
@@ -966,6 +999,7 @@ class ConfigDialog:
         self.config.set('sql_username', self._get_entry_value(self.username_entry, "np. sa"))
         self.config.set('sql_password', self._get_entry_value(self.password_entry, "••••••••"))
         self.config.set('webhook_url', self._get_entry_value(self.webhook_entry, "https://your-n8n.app.n8n.cloud/webhook/..."))
+        self.config.set('webhook_api_key', self._get_entry_value(self.apikey_entry, "Klucz API do autoryzacji webhooka"))
         self.config.save()
 
         self.on_save_callback()
@@ -980,6 +1014,7 @@ class ConfigDialog:
         username = self._get_entry_value(self.username_entry, "np. sa")
         password = self._get_entry_value(self.password_entry, "••••••••")
         webhook = self._get_entry_value(self.webhook_entry, "https://your-n8n.app.n8n.cloud/webhook/...")
+        api_key = self._get_entry_value(self.apikey_entry, "Klucz API do autoryzacji webhooka")
 
         # Build result message
         results = []
@@ -996,7 +1031,7 @@ class ConfigDialog:
 
         # Test webhook
         if webhook:
-            sender = WebhookSender(webhook)
+            sender = WebhookSender(webhook, api_key)
             wh_ok, wh_msg = sender.test_connection()
             status = "✅" if wh_ok else "❌"
             results.append(f"\n{status} Webhook\n   {wh_msg}")

@@ -13,7 +13,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [1/3] Instalowanie zaleznosci...
+echo [1/2] Instalowanie zaleznosci...
 pip install -r requirements.txt
 if errorlevel 1 (
     echo [ERROR] Blad podczas instalacji zaleznosci
@@ -22,12 +22,12 @@ if errorlevel 1 (
 )
 
 echo.
-echo [2/3] Budowanie pliku .exe...
+echo [2/2] Budowanie pliku .exe...
+REM Config is stored in %%APPDATA%%\PlatnikZUSExporter\ (not alongside exe)
+REM This is the standard Windows way - Program Files is read-only
 pyinstaller --onefile ^
     --windowed ^
     --name "PlatnikZUSExporter" ^
-    --add-data "config.json;." ^
-    --add-data "klienci_email.csv;." ^
     src/main.py
 
 if errorlevel 1 (
@@ -37,21 +37,15 @@ if errorlevel 1 (
 )
 
 echo.
-echo [3/3] Kopiowanie plikow konfiguracyjnych...
-copy config.json dist\
-copy klienci_email.csv dist\
-
-echo.
 echo =========================================
 echo   BUILD ZAKONCZONY POMYSLNIE!
 echo =========================================
 echo.
-echo Plik .exe znajduje sie w folderze: dist\
+echo Plik .exe znajduje sie w folderze: dist\PlatnikZUSExporter.exe
 echo.
-echo Aby uruchomic, skopiuj caly folder dist\
-echo na komputer z baza Platnika.
-echo.
-echo Pliki w folderze dist\:
-dir dist\ /b
+echo INFORMACJA:
+echo - Konfiguracja jest zapisywana w: %%APPDATA%%\PlatnikZUSExporter\config.json
+echo - Mozesz uruchomic exe z dowolnego miejsca (np. z pulpitu)
+echo - Aby stworzyc instalator: uruchom installer\build_installer.bat
 echo.
 pause

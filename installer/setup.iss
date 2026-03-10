@@ -57,8 +57,9 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; Główna aplikacja
 Source: "..\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 
-; Konfiguracja
-Source: "..\config.json"; DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
+; Konfiguracja - NIE kopiujemy do Program Files (read-only)!
+; Aplikacja automatycznie tworzy config.json w %APPDATA%\PlatnikZUSExporter\
+; przy pierwszym uruchomieniu
 
 ; Sterownik ODBC (pakowany z instalatorem)
 Source: "redist\msodbcsql.msi"; DestDir: "{tmp}"; Flags: ignoreversion deleteafterinstall; Check: not IsODBCDriverInstalled

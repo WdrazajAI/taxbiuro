@@ -67,7 +67,7 @@ pip install pyinstaller -q 2>nul
 
 if not exist "dist\PlatnikZUSExporter.exe" (
     echo      Running PyInstaller...
-    pyinstaller --onefile --windowed --name "PlatnikZUSExporter" --add-data "config.json;." src/main.py -y
+    python -m PyInstaller --onefile --windowed --name "PlatnikZUSExporter" src/main.py -y
     if errorlevel 1 (
         echo [ERROR] PyInstaller failed!
         pause

@@ -13,18 +13,27 @@ from datetime import datetime
 class WebhookSender:
     """Sends ZUS data to n8n webhook."""
 
-    def __init__(self, webhook_url: str, max_retries: int = 3, timeout: int = 30):
+    def __init__(self, webhook_url: str, api_key: str = "", max_retries: int = 3, timeout: int = 30):
         """
         Initialize webhook sender.
 
         Args:
             webhook_url: n8n webhook URL
+            api_key: API key for webhook authentication (X-API-Key header)
             max_retries: Number of retry attempts on failure
             timeout: Request timeout in seconds
         """
         self.webhook_url = webhook_url
+        self.api_key = api_key
         self.max_retries = max_retries
         self.timeout = timeout
+
+    def _get_headers(self) -> Dict:
+        """Build request headers including API key if configured."""
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["X-API-Key"] = self.api_key
+        return headers
 
     def prepare_payload(
         self,
@@ -98,7 +107,7 @@ class WebhookSender:
                 response = requests.post(
                     self.webhook_url,
                     json=payload,
-                    headers={"Content-Type": "application/json"},
+                    headers=self._get_headers(),
                     timeout=self.timeout
                 )
 
@@ -152,7 +161,7 @@ class WebhookSender:
             response = requests.post(
                 self.webhook_url,
                 json=test_payload,
-                headers={"Content-Type": "application/json"},
+                headers=self._get_headers(),
                 timeout=10
             )
 
